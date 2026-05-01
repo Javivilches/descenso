@@ -3,19 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulador permanencia</title>
-<link rel="stylesheet" href="style.css">
+
+<title>Simulador descenso</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#0f172a;
+    color:white;
+}
+
+/* HEADER */
+h1{
+    text-align:center;
+    padding:15px;
+    margin:0;
+    font-size:22px;
+}
+
+/* LAYOUT */
+.container{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+}
+
+/* TARJETAS */
+.card{
+    background:#1e293b;
+    border-radius:12px;
+    padding:15px;
+}
+
+/* IZQUIERDA */
+.izq{
+    width:380px;
+}
+
+/* DERECHA */
+.der{
+    width:260px;
+}
+
+/* NAV */
+.nav{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.nav span{
+    padding:5px 8px;
+    margin:2px;
+    cursor:pointer;
+    border-radius:6px;
+    background:#334155;
+}
+
+.activa{
+    background:#22c55e;
+    color:black;
+}
+
+/* PARTIDOS */
+.partido{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:6px 0;
+    font-size:14px;
+}
+
+.equipo{
+    width:110px;
+}
+
+.marcador{
+    display:flex;
+    gap:5px;
+    align-items:center;
+}
+
+input{
+    width:32px;
+    height:28px;
+    text-align:center;
+    border-radius:6px;
+    border:none;
+    background:#0f172a;
+    color:white;
+}
+
+/* TABLA */
+.titulo{
+    font-size:18px;
+    text-align:center;
+    font-weight:bold;
+    letter-spacing:1px;
+    margin-bottom:10px;
+}
+
+.fila{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:14px;
+}
+
+.cabecera{
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+    padding-bottom:5px;
+    margin-bottom:5px;
+}
+
+.descenso{
+    color:#ef4444;
+    font-weight:bold;
+}
+</style>
 </head>
 
 <body>
 
-<h1>🔥 Simulador permanencia</h1>
+<h1>Simulador descenso LaLiga</h1>
+
+<div class="container">
+
+<!-- IZQUIERDA -->
+<div class="card izq">
+
+<div class="nav" id="nav"></div>
+<div class="titulo" id="tituloJornada"></div>
 
 <div id="partidos"></div>
 
-<h2>Clasificación</h2>
+</div>
+
+<!-- DERECHA -->
+<div class="card der">
+
+<div class="titulo">CLASIFICACIÓN</div>
+
+<div class="fila cabecera">
+    <span>Equipo</span>
+    <span>Pts</span>
+</div>
+
 <div id="tabla"></div>
 
-<script src="app.js"></script>
+</div>
+
+</div>
+
+<script>
+
+const base = {
+"OVIEDO":28,
+"LEVANTE":33,
+"SEVILLA":34,
+"MALLORCA":35,
+"ALAVÉS":36,
+"GIRONA":38,
+"ESPANYOL":38,
+"ELCHE":38,
+"VALENCIA":39,
+"RAYO":39
+};
+
+const jornadas = {
+34:[
+["BETIS","OVIEDO"],
+["VILLARREAL","LEVANTE"],
+["SEVILLA","R.SOCIEDAD"],
+["GIRONA","MALLORCA"],
+["ALAVÉS","ATHLETIC"],
+["ESPANYOL","R.MADRID"],
+["CELTA","ELCHE"],
+["VALENCIA","ATLÉTICO"],
+["GETAFE","RAYO"]
+],
+35:[
+["OVIEDO","GETAFE"],
+["LEVANTE","OSASUNA"],
+["SEVILLA","ESPANYOL"],
+["MALLORCA","VILLARREAL"],
+["ELCHE","ALAVÉS"],
+["RAYO","GIRONA"],
+["ATHLETIC","VALENCIA"]
+],
+36:[
+["R.MADRID","OVIEDO"],
+["CELTA","LEVANTE"],
+["VILLARREAL","SEVILLA"],
+["GETAFE","MALLORCA"],
+["ALAVÉS","BARCELONA"],
+["GIRONA","R.SOCIEDAD"],
+["ESPANYOL","ATHLETIC"],
+["BETIS","ELCHE"],
+["VALENCIA","RAYO"]
+],
+37:[
+["OVIEDO","ALAVÉS"],
+["LEVANTE","MALLORCA"],
+["SEVILLA","R.MADRID"],
+["ATLÉTICO","GIRONA"],
+["OSASUNA","ESPANYOL"],
+["ELCHE","GETAFE"],
+["R.SOCIEDAD","VALENCIA"],
+["RAYO","VILLARREAL"]
+],
+38:[
+["MALLORCA","OVIEDO"],
+["BETIS","LEVANTE"],
+["CELTA","SEVILLA"],
+["ALAVÉS","RAYO"],
+["GIRONA","ELCHE"],
+["ESPANYOL","R.SOCIEDAD"],
+["VALENCIA","BARCELONA"]
+]
+};
+
+let jornadaActual = 34;
+let resultados = {};
+
+function renderNav(){
+    let html="";
+    Object.keys(jornadas).forEach(j=>{
+        html+=`<span onclick="cambiar(${j})" class="${j==jornadaActual?'activa':''}">${j}</span>`;
+    });
+    document.getElementById("nav").innerHTML=html;
+}
+
+function renderPartidos(){
+    let lista = jornadas[jornadaActual];
+    document.getElementById("tituloJornada").innerText="Jornada "+jornadaActual;
+
+    let html="";
+
+    lista.forEach((p,i)=>{
+        let key=jornadaActual+"-"+i;
+        let gl=resultados[key]?.gl??"";
+        let gv=resultados[key]?.gv??"";
+
+        html+=`
+        <div class="partido">
+            <span class="equipo">${p[0]}</span>
+
+            <div class="marcador">
+                <input value="${gl}" oninput="guardar(${jornadaActual},${i},this.value,null)">
+                -
+                <input value="${gv}" oninput="guardar(${jornadaActual},${i},null,this.value)">
+            </div>
+
+            <span class="equipo" style="text-align:right">${p[1]}</span>
+        </div>`;
+    });
+
+    document.getElementById("partidos").innerHTML=html;
+}
+
+function guardar(j,i,gl,gv){
+    let key=j+"-"+i;
+    if(!resultados[key]) resultados[key]={};
+
+    if(gl!==null) resultados[key].gl=parseInt(gl);
+    if(gv!==null) resultados[key].gv=parseInt(gv);
+
+    calcular();
+}
+
+function cambiar(j){
+    jornadaActual=j;
+    renderNav();
+    renderPartidos();
+}
+
+function calcular(){
+
+    let puntos={...base};
+
+    Object.entries(resultados).forEach(([k,r])=>{
+        if(isNaN(r.gl)||isNaN(r.gv)) return;
+
+        let [j,i]=k.split("-");
+        let p=jornadas[j][i];
+
+        if(r.gl>r.gv){
+            if(puntos[p[0]]!==undefined) puntos[p[0]]+=3;
+        }else if(r.gv>r.gl){
+            if(puntos[p[1]]!==undefined) puntos[p[1]]+=3;
+        }else{
+            if(puntos[p[0]]!==undefined) puntos[p[0]]+=1;
+            if(puntos[p[1]]!==undefined) puntos[p[1]]+=1;
+        }
+    });
+
+    let tabla=Object.entries(puntos)
+        .map(([e,p])=>({e,p}))
+        .sort((a,b)=>b.p-a.p);
+
+    let html="";
+
+    tabla.forEach((t,i)=>{
+        html+=`
+        <div class="fila ${i>=7?'descenso':''}">
+            <span>${i+11}. ${t.e}</span>
+            <span>${t.p}</span>
+        </div>`;
+    });
+
+    document.getElementById("tabla").innerHTML=html;
+}
+
+renderNav();
+renderPartidos();
+calcular();
+
+</script>
+
 </body>
 </html>
