@@ -182,6 +182,77 @@ input{
     opacity:0.85;
     line-height:1.6;
 }
+
+/* 📱 MÓVIL */
+@media (max-width: 768px){
+
+    .container{
+        flex-direction: column;
+        align-items: center;
+        padding:10px;
+    }
+
+    .izq, .der{
+        width:100%;
+        max-width:420px;
+    }
+
+    h1{
+        font-size:20px;
+        flex-direction: column;
+        gap:5px;
+    }
+
+    h1 img{
+        height:26px;
+    }
+
+    /* NAV más compacta */
+    .nav span{
+        padding:6px 10px;
+        font-size:14px;
+    }
+
+    /* PARTIDOS */
+    .partido{
+        font-size:13px;
+        margin:8px 0;
+    }
+
+    .equipo{
+        width:auto;
+        font-size:13px;
+    }
+
+    .equipo img{
+        width:26px;
+        height:26px;
+    }
+
+    /* INPUTS más táctiles */
+    input{
+        width:42px;
+        height:38px;
+        font-size:16px;
+    }
+
+    /* CLASIFICACIÓN */
+    .fila{
+        font-size:14px;
+        padding:8px 0;
+    }
+
+    .fila img{
+        width:28px;
+        height:28px;
+    }
+
+    /* NOTAS */
+    .notas{
+        font-size:12px;
+        padding:0 10px;
+    }
+}
 </style>
 </head>
 
