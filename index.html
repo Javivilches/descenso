@@ -306,6 +306,89 @@ const jornadas = {
 38:[["MALLORCA","OVIEDO"],["BETIS","LEVANTE"],["CELTA","SEVILLA"],["ALAVÉS","RAYO"],["GIRONA","ELCHE"],["ESPANYOL","R.SOCIEDAD"],["VALENCIA","BARCELONA"]]
 };
 
+const enfrentamientosDirectos = [
+["ESPANYOL","RAYO",1,0],
+["RAYO","ESPANYOL",1,0],
+["ESPANYOL","VALENCIA",2,2],
+["VALENCIA","ESPANYOL",3,2],
+["OVIEDO","ESPANYOL",0,2],
+["ESPANYOL","OVIEDO",1,1],
+["ESPANYOL","ELCHE",1,0],
+["ELCHE","ESPANYOL",2,2],
+["LEVANTE","ESPANYOL",1,1],
+["ESPANYOL","LEVANTE",0,0],
+["ESPANYOL","SEVILLA",2,1],
+["ESPANYOL","MALLORCA",3,2],
+["MALLORCA","ESPANYOL",2,1],
+["ALAVÉS","ESPANYOL",2,1],
+["ESPANYOL","ALAVÉS",1,2],
+["GIRONA","ESPANYOL",0,0],
+["ESPANYOL","GIRONA",0,2],
+["RAYO","VALENCIA",1,1],
+["OVIEDO","RAYO",0,0],
+["RAYO","OVIEDO",3,0],
+["ELCHE","RAYO",4,0],
+["RAYO","ELCHE",1,0],
+["LEVANTE","RAYO",0,3],
+["RAYO","LEVANTE",1,1],
+["RAYO","SEVILLA",0,1],
+["SEVILLA","RAYO",1,1],
+["RAYO","MALLORCA",2,1],
+["MALLORCA","RAYO",3,0],
+["RAYO","ALAVÉS",1,0],
+["GIRONA","RAYO",1,3],
+["VALENCIA","OVIEDO",1,2],
+["OVIEDO","VALENCIA",1,0],
+["VALENCIA","ELCHE",1,1],
+["ELCHE","VALENCIA",1,0],
+["VALENCIA","LEVANTE",1,0],
+["LEVANTE","VALENCIA",0,2],
+["VALENCIA","SEVILLA",1,1],
+["SEVILLA","VALENCIA",0,2],
+["VALENCIA","MALLORCA",1,1],
+["MALLORCA","VALENCIA",1,1],
+["ALAVÉS","VALENCIA",0,0],
+["VALENCIA","ALAVÉS",3,2],
+["GIRONA","VALENCIA",2,1],
+["VALENCIA","GIRONA",2,1],
+["ELCHE","OVIEDO",1,0],
+["OVIEDO","ELCHE",1,2],
+["OVIEDO","LEVANTE",0,2],
+["LEVANTE","OVIEDO",4,2],
+["SEVILLA","OVIEDO",4,0],
+["OVIEDO","SEVILLA",1,0],
+["OVIEDO","MALLORCA",0,0],
+["ALAVÉS","OVIEDO",1,1],
+["GIRONA","OVIEDO",3,3],
+["OVIEDO","GIRONA",1,0],
+["ELCHE","LEVANTE",2,0],
+["LEVANTE","ELCHE",3,2],
+["SEVILLA","ELCHE",2,2],
+["ELCHE","SEVILLA",2,2],
+["MALLORCA","ELCHE",3,1],
+["ELCHE","MALLORCA",2,1],
+["ALAVÉS","ELCHE",3,1],
+["ELCHE","GIRONA",3,0],
+["SEVILLA","LEVANTE",0,3],
+["LEVANTE","SEVILLA",2,0],
+["MALLORCA","LEVANTE",1,1],
+["ALAVÉS","LEVANTE",2,1],
+["LEVANTE","ALAVÉS",2,0],
+["GIRONA","LEVANTE",0,4],
+["LEVANTE","GIRONA",1,1],
+["SEVILLA","MALLORCA",1,3],
+["MALLORCA","SEVILLA",4,1],
+["ALAVÉS","SEVILLA",1,2],
+["SEVILLA","ALAVÉS",1,1],
+["GIRONA","SEVILLA",0,2],
+["SEVILLA","GIRONA",1,1],
+["MALLORCA","ALAVÉS",1,0],
+["ALAVÉS","MALLORCA",2,1],
+["MALLORCA","GIRONA",1,2],
+["GIRONA","ALAVÉS",1,0],
+["ALAVÉS","GIRONA",2,2]
+];
+
 let jornadaActual = 34;
 let resultados = {};
 
@@ -363,6 +446,46 @@ function cambiar(j){
     renderNav();
     renderPartidos();
 }
+function calcularMiniliga(equipos){
+
+    let datos = {};
+
+    equipos.forEach(e=>{
+        datos[e]={pts:0, dg:0, gf:0};
+    });
+
+    function procesar(local, visitante, gl, gv){
+        if(!equipos.includes(local) || !equipos.includes(visitante)) return;
+
+        if(gl>gv) datos[local].pts+=3;
+        else if(gv>gl) datos[visitante].pts+=3;
+        else{
+            datos[local].pts+=1;
+            datos[visitante].pts+=1;
+        }
+
+        datos[local].dg += gl-gv;
+        datos[visitante].dg += gv-gl;
+
+        datos[local].gf += gl;
+        datos[visitante].gf += gv;
+    }
+
+    enfrentamientosDirectos.forEach(p=>{
+        procesar(p[0],p[1],p[2],p[3]);
+    });
+
+    Object.entries(resultados).forEach(([k,r])=>{
+        if(isNaN(r.gl)||isNaN(r.gv)) return;
+
+        let [j,i]=k.split("-");
+        let p=jornadas[j][i];
+
+        procesar(p[0],p[1],r.gl,r.gv);
+    });
+
+    return datos;
+}
 
 function calcular(){
 
@@ -386,11 +509,49 @@ function calcular(){
 
     let tabla=Object.entries(puntos)
         .map(([e,p])=>({e,p}))
-        .sort((a,b)=>b.p-a.p);
+        
+// ordenar por puntos
+tabla.sort((a,b)=>b.p-a.p);
+
+// resolver empates
+let final = [];
+
+let i=0;
+
+while(i < tabla.length){
+
+    let grupo = [tabla[i]];
+    let j=i+1;
+
+    while(j < tabla.length && tabla[j].p === tabla[i].p){
+        grupo.push(tabla[j]);
+        j++;
+    }
+
+    if(grupo.length > 1){
+
+        let equipos = grupo.map(t=>t.e);
+        let mini = calcularMiniliga(equipos);
+
+        grupo.sort((a,b)=>{
+            let A = mini[a.e];
+            let B = mini[b.e];
+
+            if(B.pts !== A.pts) return B.pts - A.pts;
+            if(B.dg !== A.dg) return B.dg - A.dg;
+            if(B.gf !== A.gf) return B.gf - A.gf;
+
+            return 0;
+        });
+    }
+
+    final.push(...grupo);
+    i=j;
+}
 
     let html="";
 
-    tabla.forEach((t,i)=>{
+    final.forEach((t,i)=>{
         html+=`
         <div class="fila ${i>=7?'descenso':''}">
             <span>${i+11}. ${escudo(t.e)} ${t.e}</span>
