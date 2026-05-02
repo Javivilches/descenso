@@ -319,7 +319,7 @@ SIMULADOR DESCENSO
 
 const base = {
 "OVIEDO":28,"LEVANTE":33,"SEVILLA":34,"MALLORCA":35,
-"ALAVÉS":36,"GIRONA":38,"ESPANYOL":38,"ELCHE":38,
+"ALAVÉS":36,"GIRONA":38,"ESPANYOL":39,"ELCHE":38,
 "VALENCIA":39,"RAYO":39
 };
 
@@ -416,6 +416,7 @@ const enfrentamientosDirectos = [
 
 let jornadaActual = 34;
 let resultados = {};
+resultados["34-3"] = {gl:0, gv:1};
 
 function escudo(nombre){
     return `<img src="escudos/${nombre.toLowerCase()}.png">`;
@@ -444,9 +445,15 @@ function renderPartidos(){
             <span class="equipo">${escudo(p[0])}${p[0]}</span>
 
             <div class="marcador">
-                <input value="${gl}" oninput="guardar(${jornadaActual},${i},this.value,null)">
-                -
-                <input value="${gv}" oninput="guardar(${jornadaActual},${i},null,this.value)">
+                ${(jornadaActual==34 && i==3) ? `
+    <input value="0" disabled>
+    -
+    <input value="1" disabled>
+` : `
+    <input value="${gl}" oninput="guardar(${jornadaActual},${i},this.value,null)">
+    -
+    <input value="${gv}" oninput="guardar(${jornadaActual},${i},null,this.value)">
+`}
             </div>
 
             <span class="equipo" style="justify-content:flex-end">${p[1]}${escudo(p[1])}</span>
