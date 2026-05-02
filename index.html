@@ -417,6 +417,7 @@ const enfrentamientosDirectos = [
 let jornadaActual = 34;
 let resultados = {};
 resultados["34-3"] = {gl:0, gv:1};
+resultados["34-1"] = {gl:5, gv:1};
 
 function escudo(nombre){
     return `<img src="escudos/${nombre.toLowerCase()}.png">`;
@@ -445,8 +446,12 @@ function renderPartidos(){
             <span class="equipo">${escudo(p[0])}${p[0]}</span>
 
             <div class="marcador">
-                ${(jornadaActual==34 && i==3) ? `
+               ${(jornadaActual==34 && i==3) ? `
     <input value="0" disabled>
+    -
+    <input value="1" disabled>
+` : (jornadaActual==34 && i==1) ? `
+    <input value="5" disabled>
     -
     <input value="1" disabled>
 ` : `
