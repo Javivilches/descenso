@@ -416,8 +416,16 @@ const enfrentamientosDirectos = [
 
 let jornadaActual = 34;
 let resultados = {};
-resultados["34-3"] = {gl:0, gv:1};
-resultados["34-1"] = {gl:5, gv:1};
+
+const fijos = {
+    "34-4": [2,4],   // Alavés - Athletic
+    "34-1": [5,1],   // Villarreal - Levante
+    "34-3": [0,1]    // Girona - Mallorca
+};
+
+Object.entries(fijos).forEach(([k,v])=>{
+    resultados[k] = {gl:v[0], gv:v[1]};
+});
 
 function escudo(nombre){
     return `<img src="escudos/${nombre.toLowerCase()}.png">`;
@@ -455,9 +463,15 @@ function renderPartidos(){
     -
     <input value="1" disabled>
 ` : `
+    ${fijos[jornadaActual+"-"+i] ? `
+    <input value="${fijos[jornadaActual+"-"+i][0]}" disabled>
+    -
+    <input value="${fijos[jornadaActual+"-"+i][1]}" disabled>
+` : `
     <input value="${gl}" oninput="guardar(${jornadaActual},${i},this.value,null)">
     -
     <input value="${gv}" oninput="guardar(${jornadaActual},${i},null,this.value)">
+`}
 `}
             </div>
 
